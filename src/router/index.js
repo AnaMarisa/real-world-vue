@@ -1,29 +1,71 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import AboutView from '@/views/AboutView.vue'
-import EventListView from '../views/EventListView.vue'
-import EventDetailsView from '@/components/EventDetailsView.vue'
+import About from '@/views/About.vue'
+import EventList from '@/views/EventList.vue'
+import EventDetails from '@/views/event/Details.vue'
+import EventLayout from '@/views/event/Layout.vue'
+import EventRegister from '@/views/event/Register.vue'
+import EventEdit from '@/views/event/Edit.vue'
+import NotFound from '@/views/NotFound.vue'
+import NetworkError from '@/views/NetworkError.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      name: 'event-list',
-      component: EventListView
+      name: 'EventList',
+      component: EventList,
+      props: (route) => ({ page: parseInt(route.query.page) || 1 })
     },
     {
-      path: '/event/:id',
-      name: 'event-details',
+      path: '/events/:id',
+      name: 'EventLayout',
       props: true,
-      component: EventDetailsView
+      component: EventLayout,
+      children: [
+        {
+          path: '',
+          name: 'EventDetails',
+          component: EventDetails
+        },
+        {
+          path: 'register',
+          name: 'EventRegister',
+          component: EventRegister
+        },
+        {
+          path: 'edit',
+          name: 'EventEdit',
+          component: EventEdit
+        }
+      ]
+    },
+    {
+      path: '/event/:afterEvent(.*)',
+      redirect: (to) => {
+        return { path: '/events/' + to.params.afterEvent }
+      }
     },
     {
       path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => AboutView
+      name: 'About',
+      component: About // Corrected the dynamic import
+    },
+    {
+      path: '/404/:resource',
+      name: '404Resource',
+      component: NotFound,
+      props: true
+    },
+    {
+      path: '/:catchAll(.*)',
+      name: 'NotFound',
+      component: NotFound
+    },
+    {
+      path: '/network-error',
+      name: 'NetworkError',
+      component: NetworkError
     }
   ]
 })
